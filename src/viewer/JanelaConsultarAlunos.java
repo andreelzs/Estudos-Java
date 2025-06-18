@@ -2,132 +2,96 @@ package viewer;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
+import controller.CtrlPrograma;
 
-import controller.CtrlConsultarAlunos;
-import model.Aluno;
+public class JanelaPrincipal extends JanelaAbstrata<CtrlPrograma> {
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
 
-public class JanelaConsultarAlunos extends JanelaAbstrata<CtrlConsultarAlunos> {
-	//
-	// ATRIBUTOS
-	//
-	private JPanel      contentPane;
-	private JScrollPane scrollPane;
-	private JTable      tabela;
-	private Aluno[]     listaAlunos;
+    public JanelaPrincipal(CtrlPrograma ctrl) {
+        super(ctrl);
+        setTitle("Janela Principal");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 450, 228);
+        contentPane = new JPanel();
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
 
-	/**
-	 * Create the frame.
-	 */
-	public JanelaConsultarAlunos(CtrlConsultarAlunos c, Aluno[] conjAlunos) {
-		super(c);
-		setTitle("Alunos");
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		setBounds(100, 100, 450, 300);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        JButton btDepartamento = new JButton("Departamento");
+        btDepartamento.setBounds(149, 84, 119, 23);
+        btDepartamento.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new JanelaDepartamento().setVisible(true);
+            }
+        });
+        contentPane.add(btDepartamento);
 
-		setContentPane(contentPane);
-		contentPane.setLayout(null);
+        JButton btSair = new JButton("Sair");
+        btSair.setBounds(278, 130, 119, 23);
+        btSair.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                getCtrl().encerrar();
+            }
+        });
+        contentPane.add(btSair);
 
-		JButton btSair = new JButton("Sair");
-		btSair.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				setVisible(false);
-			}
-		});
-		btSair.setBounds(335, 227, 89, 23);
-		contentPane.add(btSair);
+        JButton btDisciplina = new JButton("Disciplina");
+        btDisciplina.setBounds(20, 84, 119, 23);
+        btDisciplina.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new JanelaDisciplina().setVisible(true);
+            }
+        });
+        contentPane.add(btDisciplina);
 
-		this.atualizarDados(conjAlunos);
-		
-		JScrollPane scrollPane = new JScrollPane(tabela);
-		scrollPane.setBounds(10, 11, 414, 200);
-		contentPane.add(scrollPane);		
+        JButton btIncluirEmpregado = new JButton("Empregado");
+        btIncluirEmpregado.setBounds(278, 84, 119, 23);
+        btIncluirEmpregado.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                new JanelaEmpregado().setVisible(true);
+            }
+        });
+        contentPane.add(btIncluirEmpregado);
 
-		JButton btIncluir = new JButton("Incluir");
-		btIncluir.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// Notifico ao controlador que o usuário quer iniciar o caso de uso
-				// Incluir Aluno
-				getCtrl().iniciarIncluirAluno();
-			}
-		});
-		btIncluir.setBounds(10, 227, 89, 23);
-		contentPane.add(btIncluir);
-		
-		JButton btExcluir = new JButton("Excluir");
-		btExcluir.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// Verificando se o usuário selecionou algum aluno
-				Aluno a = obterLinhaSelecionada();
-				// Se o usuário selecionou algum aluno
-				if(a != null) {
-					// Realizamos o casting para que o compilador entenda que o 'ctrl'
-					// aponta para um CtrlConsultarAlunos
-					CtrlConsultarAlunos ctrlConsultarAlunos = (CtrlConsultarAlunos)getCtrl();
-					// Notifico ao controlador que o usuário quer iniciar o caso de uso
-					// Excluir Aluno
-					//ctrlConsultarAlunos.iniciarExcluirAluno(a);
-				}
-				else
-					notificar("Selecione um curso para exclusão");			}
-		});
-		btExcluir.setBounds(121, 227, 89, 23);
-		contentPane.add(btExcluir);
-		
-		JButton btAlterar = new JButton("Alterar");
-		btAlterar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				// Verificando se o usuário selecionou algum aluno
-				Aluno a = obterLinhaSelecionada();
-				// Se o usuário selecionou algum aluno
-				if(a != null) {
-					// Realizamos o casting para que o compilador entenda que o 'ctrl'
-					// aponta para um CtrlConsultarAlunos
-					CtrlConsultarAlunos ctrlConsultarAlunos = (CtrlConsultarAlunos)getCtrl();
-					// Notifico ao controlador que o usuário quer iniciar o caso de uso
-					// Excluir Aluno
-					//ctrlConsultarAlunos.iniciarAlterarAluno(a);
-				}
-				else
-					notificar("Selecione um curso para exclusão");	
+        JButton btConsultarAlunos = new JButton("Alunos");
+        btConsultarAlunos.setBounds(149, 37, 119, 23);
+        btConsultarAlunos.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                getCtrl().iniciarConsultarAlunos();
+            }
+        });
+        contentPane.add(btConsultarAlunos);
 
-				
-			}
-		});
-		btAlterar.setBounds(231, 227, 89, 23);
-		contentPane.add(btAlterar);
-		
-		this.setVisible(true);
-	}
+        JButton btConsultarCursos = new JButton("Cursos");
+        btConsultarCursos.setBounds(20, 37, 119, 23);
+        btConsultarCursos.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                getCtrl().iniciarConsultarCursos();
+            }
+        });
+        contentPane.add(btConsultarCursos);
+        
+        JButton btnManterAgencias = new JButton("Agências");
+        btnManterAgencias.setBounds(20, 130, 119, 23);
+        btnManterAgencias.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                getCtrl().iniciarManterAgencias();
+            }
+        });
+        contentPane.add(btnManterAgencias);
 
-	/**
-	 * Atualiza os dados apresentados no JTable da janela
-	 */
-	public void atualizarDados(Aluno[] conjAlunos) {
-		this.listaAlunos = conjAlunos;
-		HelperTableModel h = new HelperTableModel(this.listaAlunos);
-		if(this.tabela == null)
-			this.tabela = new JTable(h.getTableModel());
-		else 
-			this.tabela.setModel(h.getTableModel());
-	}
-
-	/**
-	 * Retorna qual objeto 
-	 * @return
-	 */
-	public Aluno obterLinhaSelecionada() {
-		int numLinhaSelecionada = this.tabela.getSelectedRow();
-		if(numLinhaSelecionada != -1)
-			return this.listaAlunos[numLinhaSelecionada];
-		return null;
-	}	
+        JButton btnManterContas = new JButton("Contas");
+        btnManterContas.setBounds(149, 130, 119, 23);
+        btnManterContas.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                getCtrl().iniciarManterContas();
+            }
+        });
+        contentPane.add(btnManterContas);
+    }
 }
