@@ -1,133 +1,154 @@
 package model;
 
-import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
-public class Pessoa implements Serializable {
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+
+@Entity
+public class Pessoa {
 	//
 	// CONSTANTES
 	//
-	public static int VALOR_MAX_IDADE = 150;
-	public static int TAM_CPF = 14;
-
-	//
+	final public static int TAM_CPF         = 14;
+	final public static int TAM_MAXIMO_NOME = 40;
+	final public static int IDADE_MAXIMA    = 150;
+	
+	// 
 	// ATRIBUTOS
 	//
-	private String cpf; // tipo do atributo cpf: Ponteiro para (um objeto) String
-	private String nome; // tipo do atributo nome: Ponteiro para (um objeto) String
-	private int idade; // tipo do atributo idade: int (tipo primitivo)
-
+	@Id @GeneratedValue
+	private int    id;
+	@Column(length=TAM_CPF,unique=true)
+	private String cpf;
+	@Column(length=TAM_MAXIMO_NOME)
+	private String nome;
+	@Column
+	private int    idade;
+		
+	//
+	// ATRIBUTOS DE RELACIONAMENTO
+	//
+	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY) 
+	@JoinTable(name = "pertence_a", 
+	           joinColumns = @JoinColumn(name = "id_conta"),
+			   inverseJoinColumns = @JoinColumn(name = "id_pessoa"))
+	private Set<Conta> conjContas; 
+	
 	//
 	// MÉTODOS
 	//
 	/**
-	 * MÉTODO CONSTRUTOR da classe Pessoa. Sempre que um objeto Pessoa for criado
-	 * com o operador 'new', o novo objeto irá executar este método. É o método
-	 * responsável pela inicialização do objeto recém-criado.
-	 * 
-	 * @param c ponteiro para String - Aponta para a String que determina o cpf da
-	 *          Pessoa
-	 * @param n ponteiro para String - Aponta para a String que determina o nome da
-	 *          Pessoa
-	 * @param i int - determina o valor da idade da Pessoa
+	 * O JPA requer que toda classe "@Entity" tenha um construtor vazio!
 	 */
-	public Pessoa(String c, String n, int i) throws ModelException {
-		// Chamada ao construtor da superclasse (Object) - tópico futuro
+	public Pessoa() {	
+		System.out.println("Construtor de Pessoa com assinatura vazia foi chamado");
+	}
+	
+	public Pessoa(String cpf, String nome, int idade) throws ModelException {
 		super();
-		this.setCpf(c);
-		this.setNome(n);
-		this.setIdade(i);
+		this.setCpf(cpf);
+		this.setNome(nome);
+		this.setIdade(idade);
+		this.setConjContas(new HashSet<Conta>());
 	}
 
+	public int getId() {
+		return this.id;
+	}
+	
+	public void setId(int id) {
+		this.id = id;
+	}
+	
 	/**
-	 * Método que retorna a referência para a String que contém o cpf da Pessoa
-	 * 
-	 * @return
+	 * Como esse get se refere a um atributo de relacionamento e é uma 
+	 * coleção, então sempre vamos passar uma cópia do atributo
 	 */
+	public Set<Conta> getConjContas() {
+		// Vamos devolver uma cópia do conjContas
+		return new HashSet<Conta>(this.conjContas);
+	}
+	
+	public void setConjContas(Set<Conta> conjContas) throws ModelException {
+		Pessoa.validarConjContas(conjContas);
+		this.conjContas = conjContas;
+	}
+	
+	public static void validarConjContas(Set<Conta> conjContas) throws ModelException {
+		if(conjContas == null)
+			throw new ModelException("O conjunto de contas não pode ser nulo!");
+	}
+	
+	public void adicionarConta(Conta conta) throws ModelException{
+		Pessoa.validarConta(conta);
+		this.conjContas.add(conta);
+	}
+	
 	public String getCpf() {
 		return this.cpf;
 	}
 
-	/**
-	 * Método que altera o atributo 'cpf', fazendo com que aponte para outra String
-	 * que contém o novo cpf
-	 * 
-	 * @param novoCpf
-	 */
-	public void setCpf(String novoCpf) throws ModelException {
-		Pessoa.validarCpf(novoCpf);
-		this.cpf = novoCpf;
+	public void setCpf(String cpf) throws ModelException {
+		Pessoa.validarCpf(cpf);
+		this.cpf = cpf;
 	}
 
-	/**
-	 * Método que retorna a referência para a String que contém o nome da Pessoa
-	 * 
-	 * @return
-	 */
 	public String getNome() {
 		return this.nome;
 	}
 
-	/**
-	 * Método que altera o atributo 'nome', fazendo com que aponte para outra String
-	 * que contém o novo nome
-	 * 
-	 * @param novoNome
-	 */
-	public void setNome(String novoNome) throws ModelException {
-		Pessoa.validarNome(novoNome);
-		this.nome = novoNome;
+	public void setNome(String nome) throws ModelException {
+		Pessoa.validarNome(nome);
+		this.nome = nome;
 	}
 
-	/**
-	 * Método que retorna a idade da Pessoa
-	 * 
-	 * @return
-	 */
 	public int getIdade() {
 		return this.idade;
 	}
 
-	/**
-	 * Método que altera o atributo 'idade', fazendo com que armazene um novo valor
-	 * para idade
-	 * 
-	 * @param novaIdade
-	 */
-	public void setIdade(int novaIdade) throws ModelException {
-		Pessoa.validarIdade(novaIdade);
-		this.idade = novaIdade;
+	public void setIdade(int idade) throws ModelException {
+		Pessoa.validarIdade(idade);
+		this.idade = idade;
 	}
 
-	@Override
 	public String toString() {
-		return this.cpf + "-" + this.nome;
+		return this.nome;
 	}
-
+	//
+	// Métodos de Validação
+	//
 	public static void validarCpf(String cpf) throws ModelException {
-		if (cpf == null || cpf.length() == 0)
-			throw new ModelException("O cpf não pode ser nulo!");
-		if (cpf.length() != TAM_CPF)
-			throw new ModelException("O cpf deve ter " + TAM_CPF + " caracteres!");
-		for (int i = 0; i < cpf.length(); i++) {
-			char c = cpf.charAt(i);
-			// if( !Character.isAlphabetic(c) && !Character.isSpaceChar(c) )
-			// throw new ModelException("No nome, há um caracterer inválido '" + c + "' na
-			// posição " + i);
-		}
+		if(cpf == null || cpf.length() == 0)
+			throw new ModelException("O CPF não pode ser nulo!");
+		if(cpf.length() != TAM_CPF)
+			throw new ModelException("O CPF deve ter " + TAM_CPF + " caracteres!");
 	}
-
+	
 	public static void validarNome(String nome) throws ModelException {
-		if (nome == null || nome.length() == 0)
-			throw new ModelException("O nome não pode ser nulo!");
-		for (int i = 0; i < nome.length(); i++) {
-			char c = nome.charAt(i);
-			if (!Character.isAlphabetic(c) && !Character.isSpaceChar(c))
-				throw new ModelException("No nome, há um caracterer inválido '" + c + "' na posição " + i);
-		}
+		if(nome == null || nome.length() == 0)
+			throw new ModelException("O nome da Pessoa não pode ser nulo!");
+		if(nome.length() > TAM_MAXIMO_NOME)
+			throw new ModelException("O nome da Pessoa deve ter até " + 
+		                             TAM_MAXIMO_NOME + " caracteres!");
+	}
+	
+	public static void validarIdade(int idade) throws ModelException {
+		if(idade < 0 || idade > IDADE_MAXIMA)
+			throw new ModelException("A idade indicada é inválida: " + idade);
 	}
 
-	public static void validarIdade(int idade) throws ModelException {
-		if (idade < 0 || idade > VALOR_MAX_IDADE)
-			throw new ModelException("Idade Inválida: " + idade);
+	public static void validarConta(Conta conta) throws ModelException {
+		if(conta == null)
+			throw new ModelException("A conta bancária não pode ser nula");
 	}
+
 }

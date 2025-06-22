@@ -1,121 +1,154 @@
 package model;
 
 import java.io.Serializable;
-import model.dao.DaoConta;
+import java.util.Set;
 
 public class Conta implements Serializable {
-    private static final long serialVersionUID = 1L;
-    private int numero;
-    private String nomeCorrentista;
-    private String chavePix;
-    private double saldo;
-    private double limiteCredito;
-    private Agencia agencia;
+	//
+	// CONSTANTES
+	//
+	final public static int VALOR_MIN_NUM_CONTA = 1000;
+	final public static int VALOR_MAX_NUM_CONTA = 99999;
+	final public static double VALOR_MAX_LIMITE = 30000.00;
+	final public static int TAM_MAX_NOME_CORRENTISTA = 40;
+	final public static int TAM_MAX_CHAVE_PIX = 20;
+	//
+	// ATRIBUTOS
+	//
+	private int numero;
+	private String nomeCorrentista;
+	private String chavePix;
+	private double saldo;
+	private double limite;
 
-    public Conta(int numero, String nomeCorrentista, String chavePix, double saldo, double limiteCredito, Agencia agencia) throws ModelException {
-        this.setNumero(numero);
-        this.setNomeCorrentista(nomeCorrentista);
-        this.setChavePix(chavePix, true); // Validação de inclusão
-        this.setSaldo(saldo);
-        this.setLimiteCredito(limiteCredito);
-        this.setAgencia(agencia);
-    }
+	//
+	// ATRIBUTO DE RELACIONAMENTO
+	//
+	private Agencia agencia;
 
-    public int getNumero() {
-        return this.numero;
-    }
+	//
+	// MÉTODOS
+	//
+	public Conta(int numero, String nomeCorrentista, String chavePix,
+			     double saldo, double limite, Agencia agencia) throws ModelException {
+		super();
+		this.setNumero(numero);
+		this.setNomeCorrentista(nomeCorrentista);
+		this.setChavePix(chavePix);
+		this.setSaldo(saldo);
+		this.setLimite(limite);
+		this.setAgencia(agencia);
+	}
 
-    public void setNumero(int numero) throws ModelException {
-        validarNumero(numero);
-        this.numero = numero;
-    }
+	public int getNumero() {
+		return this.numero;
+	}
 
-    public String getNomeCorrentista() {
-        return this.nomeCorrentista;
-    }
+	public void setNumero(int num) throws ModelException {
+		Conta.validarNumero(num);
+		this.numero = num;
+	}
 
-    public void setNomeCorrentista(String nomeCorrentista) throws ModelException {
-        validarNomeCorrentista(nomeCorrentista);
-        this.nomeCorrentista = nomeCorrentista;
-    }
+	public String getNomeCorrentista() {
+		return this.nomeCorrentista;
+	}
 
-    public String getChavePix() {
-        return this.chavePix;
-    }
+	public void setNomeCorrentista(String nomeCorrentista) throws ModelException {
+		Conta.validarNomeCorrentista(nomeCorrentista);
+		this.nomeCorrentista = nomeCorrentista;
+	}
 
-    public void setChavePix(String chavePix, boolean isInclusao) throws ModelException {
-        if (isInclusao) {
-            validarChavePixInclusao(chavePix);
-        } else {
-            validarChavePixAlteracao(chavePix, this.getNumero());
-        }
-        this.chavePix = chavePix;
-    }
-    
-    public double getSaldo() {
-        return this.saldo;
-    }
+	public String getChavePix() {
+		return this.chavePix;
+	}
 
-    public void setSaldo(double saldo) throws ModelException {
-        this.saldo = saldo;
-    }
+	public void setChavePix(String chavePix) throws ModelException {
+		Conta.validarChavePix(chavePix);
+		this.chavePix = chavePix;
+	}
 
-    public double getLimiteCredito() {
-        return this.limiteCredito;
-    }
+	public double getLimite() {
+		return this.limite;
+	}
 
-    public void setLimiteCredito(double limiteCredito) {
-        this.limiteCredito = limiteCredito;
-    }
+	public void setLimite(double limite) throws ModelException {
+		Conta.validarLimite(limite);
+		this.limite = limite;
+	}
 
-    public Agencia getAgencia() {
-        return this.agencia;
-    }
+	public double getSaldo() {
+		return this.saldo;
+	}
 
-    public void setAgencia(Agencia agencia) throws ModelException {
-        validarAgencia(agencia);
-        this.agencia = agencia;
-    }
+	public void setSaldo(double saldo) throws ModelException {
+		Conta.validarSaldo(saldo, this.limite);
+		this.saldo = saldo;
+	}
 
-    @Override
-    public String toString() {
-        return this.getNumero() + " - " + this.getNomeCorrentista();
-    }
-    
-    public static void validarNumero(int numero) throws ModelException {
-        if (numero <= 0)
-            throw new ModelException("O número da conta não pode ser negativo ou zero.");
-    }
-    
-    public static void validarNomeCorrentista(String nome) throws ModelException {
-        if (nome == null || nome.trim().isEmpty())
-            throw new ModelException("O nome do correntista não pode ser nulo.");
-    }
+	public Agencia getAgencia() {
+		return this.agencia;
+	}
 
-    public static void validarChavePixInclusao(String chavePix) throws ModelException {
-        if (chavePix == null || chavePix.trim().isEmpty()) {
-            throw new ModelException("A chave PIX não pode ser nula.");
-        }
-        DaoConta dao = new DaoConta();
-        if (dao.obterContaPelaChavePix(chavePix) != null) {
-            throw new ModelException("A chave PIX informada já está em uso.");
-        }
-    }
-    
-    public static void validarChavePixAlteracao(String chavePix, int numeroConta) throws ModelException {
-        if (chavePix == null || chavePix.trim().isEmpty()) {
-            throw new ModelException("A chave PIX não pode ser nula.");
-        }
-        DaoConta dao = new DaoConta();
-        Conta contaExistente = dao.obterContaPelaChavePix(chavePix);
-        if (contaExistente != null && contaExistente.getNumero() != numeroConta) {
-            throw new ModelException("A chave PIX informada já está em uso por outra conta.");
-        }
-    }
-    
-    public static void validarAgencia(Agencia agencia) throws ModelException {
-        if (agencia == null) {
-            throw new ModelException("A agência não pode ser nula.");
-        }
-    }
+	public void setAgencia(Agencia agencia) throws ModelException {
+		Conta.validarAgencia(agencia);
+		this.agencia = agencia;
+	}
+
+	public String toString() {
+		return this.numero + " - Agência:" + this.agencia.getBairro();
+	}
+
+	//
+	// Métodos de Validação
+	//
+	public static void validarNumero(int numero) throws ModelException {
+		if (numero < VALOR_MIN_NUM_CONTA || numero > VALOR_MAX_NUM_CONTA)
+			throw new ModelException("Número de Conta Inválido: " + numero);
+	}
+	
+	public static void validarNomeCorrentista(String nome) throws ModelException {
+		if(nome == null || nome.length() == 0)
+			throw new ModelException("O nome não pode ser nulo!");
+		if(nome.length() > TAM_MAX_NOME_CORRENTISTA)
+			throw new ModelException("O nome deve ter até " + TAM_MAX_NOME_CORRENTISTA + " caracteres!");
+		for(int i = 0; i < nome.length(); i++) {
+			char c = nome.charAt(i);
+			if(!Character.isAlphabetic(c) && !Character.isSpaceChar(c))
+				throw new ModelException("O nome tem um caracter inválido na posição " + i + ": " + c);	
+		}
+	}
+	
+	public static void validarChavePix(String chavePix) throws ModelException {
+		if(chavePix == null || chavePix.length() == 0)
+			throw new ModelException("A chave do pix não pode ser nula!");
+		if(chavePix.length() > TAM_MAX_CHAVE_PIX)
+			throw new ModelException("A chave do pix deve ter até " + TAM_MAX_CHAVE_PIX + " caracteres!");
+		for(int i = 0; i < chavePix.length(); i++) {
+			char c = chavePix.charAt(i);
+			if(!Character.isAlphabetic(c) && !Character.isSpaceChar(c) && !Character.isDigit(c) &&
+				c != '.' && c != '-' && c != '@')
+				throw new ModelException("A chave do pix tem um caracter inválido na posição " + i + ": " + c);	
+		}
+	}
+	
+	public static void validarLimite(double limite) throws ModelException {
+		if (limite < 0 || limite > VALOR_MAX_LIMITE)
+			throw new ModelException("Valor Inválido para o limite: " + limite);
+	}
+
+	public static void validarSaldo(double saldo, double limite) throws ModelException {
+		if (saldo < -VALOR_MAX_LIMITE)
+			throw new ModelException(
+					"O saldo (" + saldo + ") não pode ser menor que valor do limite da conta: " + limite);
+	}
+
+	public static void validarConjCorrentistas(Set<Pessoa> conjCorrentistas) throws ModelException {
+		if (conjCorrentistas == null || conjCorrentistas.size() == 0)
+			throw new ModelException("É obrigatório indicar quem é os correntistas da conta");
+	}
+
+	public static void validarAgencia(Agencia agencia) throws ModelException {
+		if (agencia == null)
+			throw new ModelException("É obrigatório indicar qual é a agência da conta");
+	}
 }

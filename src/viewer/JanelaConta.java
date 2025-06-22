@@ -4,147 +4,236 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+
+import controller.CtrlAbstrato;
 import controller.conta.CtrlAbstratoConta;
 import controller.conta.CtrlExcluirConta;
 import model.Agencia;
 import model.Conta;
 import model.dao.DaoAgencia;
 
-public class JanelaConta extends JanelaAbstrata<CtrlAbstratoConta> {
-    private static final long serialVersionUID = 1L;
-    private JPanel contentPane;
-    private JTextField tfNumero;
-    private JTextField tfNomeCorrentista;
-    private JTextField tfChavePix;
-    private JTextField tfSaldo;
-    private JTextField tfLimiteCredito;
-    private JComboBox<Agencia> cbAgencia;
+public class JanelaConta extends JanelaAbstrata {
 
-    public JanelaConta(CtrlAbstratoConta ctrl, Conta conta) {
-        this(ctrl);
-        if (conta != null) {
-            this.tfNumero.setText(String.valueOf(conta.getNumero()));
-            this.tfNomeCorrentista.setText(conta.getNomeCorrentista());
-            this.tfChavePix.setText(conta.getChavePix());
-            this.tfSaldo.setText(String.valueOf(conta.getSaldo()));
-            this.tfLimiteCredito.setText(String.valueOf(conta.getLimiteCredito()));
-            this.cbAgencia.setSelectedItem(conta.getAgencia());
-        }
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private JTextField tfNumero;
+	private JTextField tfNomeCorrentista;
+	private JTextField tfChavePix;
+	private JTextField tfSaldo;
+	private JTextField tfLimite;
+	private JComboBox  cbAgencia;
 
-        if (ctrl instanceof CtrlExcluirConta) {
-            this.tfNumero.setEnabled(false);
-            this.tfNomeCorrentista.setEnabled(false);
-            this.tfChavePix.setEnabled(false);
-            this.tfSaldo.setEnabled(false);
-            this.tfLimiteCredito.setEnabled(false);
-            this.cbAgencia.setEnabled(false);
-            JLabel lblMsg = new JLabel("Deseja realmente excluir esta conta?");
-            lblMsg.setForeground(Color.RED);
-            lblMsg.setFont(new Font("Calibri", Font.BOLD, 14));
-            lblMsg.setBounds(80, 230, 280, 20);
-            contentPane.add(lblMsg);
-        }
-    }
+	/**
+	 * Sobrecarga (Overload) de construtores na classe, pois
+	 * terá dois construtores
+	 */
+	public JanelaConta(CtrlAbstrato ctrl, Conta conta) {
+		//
+		// Chamada ao construtor DESTA CLASSE que recebe somente 
+		// um parâmetro. Para isso usamos a INSTRUÇÃO this(...)
+		//
+		this(ctrl);
+		
+		//
+		// Se a operação é de "Alteração" ou "Exclusão", vou preencher
+		// os campos do formulário para o usuário ver os dados do objeto 
+		// a ser alterado/excluído
+		//
+		if (conta != null) {
+			tfNumero.setText(Integer.toString(conta.getNumero()));
+			tfNomeCorrentista.setText(conta.getNomeCorrentista());
+			tfChavePix.setText(conta.getChavePix());
+			tfSaldo.setText(Double.toString(conta.getSaldo()));
+			tfLimite.setText(Double.toString(conta.getLimite()));
+			cbAgencia.setSelectedItem(conta.getAgencia());			
+		}
+		
+		// Se a operação é de Exclusão, vou inabilitar os textfields
+		if(ctrl instanceof CtrlExcluirConta) {
+			tfNumero.setEnabled(false);
+			tfNomeCorrentista.setEnabled(false);
+			tfChavePix.setEnabled(false);
+			tfSaldo.setEnabled(false);
+			tfLimite.setEnabled(false);
+			cbAgencia.setEnabled(false);
+			
+			JLabel lbMsg = new JLabel("Deseja excluir essa Conta?");
+			lbMsg.setForeground(new Color(255, 0, 0));
+			lbMsg.setFont(new Font("Calibri", Font.BOLD, 16));
+			lbMsg.setBounds(135, 257, 187, 14);
+			contentPane.add(lbMsg);
+		}
+	}
+	
+	/**
+	 * @wbp.parser.constructor
+	 */
+	public JanelaConta(CtrlAbstrato ctrl) {
+		super(ctrl);
+		setTitle("Conta");
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 450, 355);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-    public JanelaConta(CtrlAbstratoConta ctrl) {
-        super(ctrl);
-        setTitle("Conta");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(100, 100, 450, 320);
-        contentPane = new JPanel();
-        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPane);
-        contentPane.setLayout(null);
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
 
-        JLabel lblNumero = new JLabel("Número:");
-        lblNumero.setBounds(20, 20, 120, 20);
-        contentPane.add(lblNumero);
+		JLabel lblNewLabel = new JLabel("Número:");
+		lblNewLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblNewLabel.setFont(new Font("Calibri", Font.PLAIN, 14));
+		lblNewLabel.setBounds(10, 16, 69, 14);
+		contentPane.add(lblNewLabel);
 
-        tfNumero = new JTextField();
-        tfNumero.setBounds(150, 20, 150, 20);
-        contentPane.add(tfNumero);
-        tfNumero.setColumns(10);
+		tfNumero = new JTextField();
+		tfNumero.setBounds(89, 11, 111, 20);
+		contentPane.add(tfNumero);
+		tfNumero.setColumns(10);
 
-        JLabel lblNomeCorrentista = new JLabel("Nome Correntista:");
-        lblNomeCorrentista.setBounds(20, 50, 120, 20);
-        contentPane.add(lblNomeCorrentista);
+		JLabel lblNewLabel_1 = new JLabel("Correntista:");
+		lblNewLabel_1.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblNewLabel_1.setFont(new Font("Calibri", Font.PLAIN, 14));
+		lblNewLabel_1.setBounds(0, 56, 79, 14);
+		contentPane.add(lblNewLabel_1);
 
-        tfNomeCorrentista = new JTextField();
-        tfNomeCorrentista.setBounds(150, 50, 250, 20);
-        contentPane.add(tfNomeCorrentista);
-        tfNomeCorrentista.setColumns(10);
+		tfNomeCorrentista = new JTextField();
+		tfNomeCorrentista.setBounds(89, 51, 311, 20);
+		contentPane.add(tfNomeCorrentista);
+		tfNomeCorrentista.setColumns(10);
 
-        JLabel lblChavePix = new JLabel("Chave PIX:");
-        lblChavePix.setBounds(20, 80, 120, 20);
-        contentPane.add(lblChavePix);
+		JButton btOk = new JButton("Ok");
+		btOk.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Mando para 'tfNumero' a mensagem 'getText()'
+				// Que retorna o conteúdo digitado dentro do textfield
+				String aux = tfNumero.getText();
+				int numero;
+				try {
+					// Convertendo a string lida para inteiro
+					numero = Integer.parseInt(aux);
+				} catch (NumberFormatException nfe) {
+					// Se não conseguiu fazer a conversão, então colocamos a dialog
+					// com o texto de erro e saímos do método
+					JOptionPane.showMessageDialog(btOk, "Valor não numérico no campo número da conta!");
+					return;
+				}
+				// Mando para 'tfNomeCorrentista' a mensagem 'getText()'
+				// Que retorna o conteúdo digitado dentro do textfield
+				String nomeCorrentista = tfNomeCorrentista.getText();
 
-        tfChavePix = new JTextField();
-        tfChavePix.setBounds(150, 80, 250, 20);
-        contentPane.add(tfChavePix);
-        tfChavePix.setColumns(10);
+				// Mando para 'tfChavePix' a mensagem 'getText()'
+				// Que retorna o conteúdo digitado dentro do textfield
+				String chavePix = tfChavePix.getText();
 
-        JLabel lblSaldo = new JLabel("Saldo:");
-        lblSaldo.setBounds(20, 110, 120, 20);
-        contentPane.add(lblSaldo);
+				// Mando para 'tfSaldo' a mensagem 'getText()'
+				// Que retorna o conteúdo digitado dentro do textfield
+				aux = tfSaldo.getText();
+				double saldo;
+				try {
+					// Convertendo a string lida para inteiro
+					saldo = Double.parseDouble(aux);
+				} catch (NumberFormatException nfe) {
+					// Se não conseguiu fazer a conversão, então colocamos a dialog
+					// com o texto de erro e saímos do método
+					JOptionPane.showMessageDialog(btOk, "Valor não numérico no campo saldo da conta!");
+					return;
+				}
+				
+				// Mando para 'tfLimite' a mensagem 'getText()'
+				// Que retorna o conteúdo digitado dentro do textfield
+				aux = tfLimite.getText();
+				double limite;
+				try {
+					// Convertendo a string lida para inteiro
+					limite = Double.parseDouble(aux);
+				} catch (NumberFormatException nfe) {
+					// Se não conseguiu fazer a conversão, então colocamos a dialog
+					// com o texto de erro e saímos do método
+					JOptionPane.showMessageDialog(btOk, "Valor não numérico no campo limite da conta!");
+					return;
+				}
 
-        tfSaldo = new JTextField();
-        tfSaldo.setBounds(150, 110, 150, 20);
-        contentPane.add(tfSaldo);
-        tfSaldo.setColumns(10);
+				// Mando para 'cbAgencia' a mensagem 'getSelectedItem()'
+				// Que retorna a agência selecionada
+				Agencia agencia = (Agencia)cbAgencia.getSelectedItem();
 
-        JLabel lblLimiteCredito = new JLabel("Limite de Crédito:");
-        lblLimiteCredito.setBounds(20, 140, 120, 20);
-        contentPane.add(lblLimiteCredito);
+				//
+				// Após ter recuperado o que o usuário definiu, vamos
+				// acionar o controlador de caso de uso associado à janela
+				//
+				CtrlAbstratoConta ctrl = (CtrlAbstratoConta) getCtrl();
+				ctrl.efetuar(numero, nomeCorrentista, chavePix, saldo, limite, agencia);
+			}
+		});
+		btOk.setBounds(104, 282, 89, 23);
+		contentPane.add(btOk);
 
-        tfLimiteCredito = new JTextField();
-        tfLimiteCredito.setBounds(150, 140, 150, 20);
-        contentPane.add(tfLimiteCredito);
-        tfLimiteCredito.setColumns(10);
+		JButton btCancelar = new JButton("Cancelar");
+		btCancelar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				getCtrl().encerrar();
+			}
+		});
+		btCancelar.setBounds(238, 282, 89, 23);
+		contentPane.add(btCancelar);
 
-        JLabel lblAgencia = new JLabel("Agência:");
-        lblAgencia.setBounds(20, 170, 120, 20);
-        contentPane.add(lblAgencia);
+		JLabel lblNewLabel_1_1 = new JLabel("Chave Pix:");
+		lblNewLabel_1_1.setBackground(new Color(240, 240, 240));
+		lblNewLabel_1_1.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblNewLabel_1_1.setFont(new Font("Calibri", Font.PLAIN, 14));
+		lblNewLabel_1_1.setBounds(10, 100, 69, 14);
+		contentPane.add(lblNewLabel_1_1);
 
-        DaoAgencia daoAgencia = new DaoAgencia();
-        cbAgencia = new JComboBox<>(daoAgencia.obterTodos());
-        cbAgencia.setBounds(150, 170, 250, 20);
-        contentPane.add(cbAgencia);
-
-        JButton btnOk = new JButton("OK");
-        btnOk.setBounds(100, 260, 100, 25);
-        btnOk.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    int numero = Integer.parseInt(tfNumero.getText());
-                    String nome = tfNomeCorrentista.getText();
-                    String chavePix = tfChavePix.getText();
-                    double saldo = Double.parseDouble(tfSaldo.getText());
-                    double limite = Double.parseDouble(tfLimiteCredito.getText());
-                    Agencia agencia = (Agencia) cbAgencia.getSelectedItem();
-                    getCtrl().efetuar(numero, nome, chavePix, saldo, limite, agencia);
-                } catch (NumberFormatException ex) {
-                    notificar("Os campos numéricos devem conter valores válidos.");
-                }
-            }
-        });
-        contentPane.add(btnOk);
-
-        JButton btnCancelar = new JButton("Cancelar");
-        btnCancelar.setBounds(250, 260, 100, 25);
-        btnCancelar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getCtrl().encerrar();
-            }
-        });
-        contentPane.add(btnCancelar);
-    }
+		tfChavePix = new JTextField();
+		tfChavePix.setColumns(10);
+		tfChavePix.setBounds(89, 95, 311, 20);
+		contentPane.add(tfChavePix);		
+		
+		JLabel lblNewLabel_1_1_1 = new JLabel("Saldo:");
+		lblNewLabel_1_1_1.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblNewLabel_1_1_1.setFont(new Font("Calibri", Font.PLAIN, 14));
+		lblNewLabel_1_1_1.setBackground(UIManager.getColor("Button.background"));
+		lblNewLabel_1_1_1.setBounds(10, 143, 69, 14);
+		contentPane.add(lblNewLabel_1_1_1);
+		
+		tfSaldo = new JTextField();
+		tfSaldo.setColumns(10);
+		tfSaldo.setBounds(89, 138, 311, 20);
+		contentPane.add(tfSaldo);
+		
+		JLabel lblNewLabel_1_1_1_1 = new JLabel("Limite:");
+		lblNewLabel_1_1_1_1.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblNewLabel_1_1_1_1.setFont(new Font("Calibri", Font.PLAIN, 14));
+		lblNewLabel_1_1_1_1.setBackground(UIManager.getColor("Button.background"));
+		lblNewLabel_1_1_1_1.setBounds(10, 184, 69, 14);
+		contentPane.add(lblNewLabel_1_1_1_1);
+		
+		tfLimite = new JTextField();
+		tfLimite.setColumns(10);
+		tfLimite.setBounds(89, 179, 311, 20);
+		contentPane.add(tfLimite);
+		
+		JLabel lblNewLabel_1_1_1_1_1 = new JLabel("Agência:");
+		lblNewLabel_1_1_1_1_1.setHorizontalAlignment(SwingConstants.RIGHT);
+		lblNewLabel_1_1_1_1_1.setFont(new Font("Calibri", Font.PLAIN, 14));
+		lblNewLabel_1_1_1_1_1.setBackground(UIManager.getColor("Button.background"));
+		lblNewLabel_1_1_1_1_1.setBounds(10, 227, 69, 14);
+		contentPane.add(lblNewLabel_1_1_1_1_1);
+		
+		DaoAgencia dao = new DaoAgencia();		
+		cbAgencia = new JComboBox( dao.obterTodos() );
+		cbAgencia.setBounds(89, 221, 311, 22);
+		contentPane.add(cbAgencia);
+	}
 }

@@ -2,93 +2,127 @@ package viewer;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.border.EmptyBorder;
+
 import controller.conta.CtrlManterContas;
 import model.Conta;
 
-public class JanelaConsultarContas extends JanelaAbstrata<CtrlManterContas> {
-    private static final long serialVersionUID = 1L;
-    private JPanel contentPane;
-    private JTable table;
-    private Conta[] listaContas;
+public class JanelaConsultarContas extends JanelaAbstrata {
+	//
+	// ATRIBUTOS
+	//
+	private JPanel contentPane;
+	private JScrollPane scrollPane;
+	private JTable tabela;
+	private Conta[] listaContas;
 
-    public JanelaConsultarContas(CtrlManterContas ctrl, Conta[] contas) {
-        super(ctrl);
-        setTitle("Manter Contas");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setBounds(100, 100, 450, 300);
-        contentPane = new JPanel();
-        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPane);
-        contentPane.setLayout(null);
+	/**
+	 * Create the frame.
+	 */
+	public JanelaConsultarContas(CtrlManterContas c, Conta[] conjContas) {
+		super(c);
+		setTitle("Agências");
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		setBounds(100, 100, 450, 300);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-        JScrollPane scrollPane = new JScrollPane();
-        scrollPane.setBounds(10, 10, 415, 200);
-        contentPane.add(scrollPane);
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
 
-        atualizarDados(contas);
-        table = new JTable();
-        scrollPane.setViewportView(table);
+		JButton btSair = new JButton("Sair");
+		btSair.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setVisible(false);
+			}
+		});
+		btSair.setBounds(335, 227, 89, 23);
+		contentPane.add(btSair);
 
-        JButton btnIncluir = new JButton("Incluir");
-        btnIncluir.setBounds(10, 225, 100, 25);
-        btnIncluir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getCtrl().iniciarIncluirConta();
-            }
-        });
-        contentPane.add(btnIncluir);
+		// A chamada a 'atualizarDados' precisa vir antes
+		// da criação do JScrollPane
+		this.atualizarDados(conjContas);
 
-        JButton btnAlterar = new JButton("Alterar");
-        btnAlterar.setBounds(120, 225, 100, 25);
-        btnAlterar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getCtrl().iniciarAlterarConta(obterLinhaSelecionada());
-            }
-        });
-        contentPane.add(btnAlterar);
+		JScrollPane scrollPane = new JScrollPane(tabela);
+		scrollPane.setBounds(10, 11, 414, 200);
+		contentPane.add(scrollPane);
 
-        JButton btnExcluir = new JButton("Excluir");
-        btnExcluir.setBounds(230, 225, 100, 25);
-        btnExcluir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getCtrl().iniciarExcluirConta(obterLinhaSelecionada());
-            }
-        });
-        contentPane.add(btnExcluir);
+		JButton btIncluir = new JButton("Incluir");
+		btIncluir.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Notifico ao controlador que o usuário quer iniciar o caso de uso
+				// Incluir Agência
+				CtrlManterContas ctrl = (CtrlManterContas)getCtrl(); 
+				ctrl.iniciarIncluirConta();
+			}
+		});
+		btIncluir.setBounds(10, 227, 89, 23);
+		contentPane.add(btIncluir);
 
-        JButton btnSair = new JButton("Sair");
-        btnSair.setBounds(340, 225, 85, 25);
-        btnSair.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                getCtrl().encerrar();
-            }
-        });
-        contentPane.add(btnSair);
-    }
+		JButton btExcluir = new JButton("Excluir");
+		btExcluir.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Verificando se o usuário selecionou alguma agência
+				Conta a = obterLinhaSelecionada();
+				// Se o usuário selecionou alguma agência
+				if (a != null) {
+					CtrlManterContas ctrl = (CtrlManterContas)getCtrl(); 
+					ctrl.iniciarExcluirConta(a);
+				} else
+					notificar("Selecione uma agência para exclusão");
+			}
+		});
+		btExcluir.setBounds(121, 227, 89, 23);
+		contentPane.add(btExcluir);
 
-    public void atualizarDados(Conta[] contas) {
-        this.listaContas = contas;
-        if(this.table != null) {
-            HelperTableModel h = new HelperTableModel(this.listaContas);
-            this.table.setModel(h.getTableModel());
-        }
-    }
+		JButton btAlterar = new JButton("Alterar");
+		btAlterar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				// Verificando se o usuário selecionou alguma agência
+				Conta a = obterLinhaSelecionada();
+				// Se o usuário selecionou alguma agência
+				if (a != null) {
+					CtrlManterContas ctrl = (CtrlManterContas)getCtrl(); 
+					ctrl.iniciarAlterarConta(a);
+				} else
+					notificar("Selecione uma agência para alteração");
+			}
+		});
+		btAlterar.setBounds(231, 227, 89, 23);
+		contentPane.add(btAlterar);
 
-    public Conta obterLinhaSelecionada() {
-        int linha = this.table.getSelectedRow();
-        if (linha == -1) {
-            return null;
-        }
-        return this.listaContas[linha];
-    }
+		this.setVisible(true);
+	}
+
+	/**
+	 * Atualiza os dados apresentados no JTable da janela
+	 */
+	public void atualizarDados(Conta[] conjContas) {
+		this.listaContas = conjContas;
+		HelperTableModel h = new HelperTableModel(this.listaContas);
+		if (this.tabela == null)
+			this.tabela = new JTable(h.getTableModel());
+		else
+			this.tabela.setModel(h.getTableModel());
+	}
+
+	/**
+	 * Retorna qual objeto
+	 * 
+	 * @return
+	 */
+	public Conta obterLinhaSelecionada() {
+		int numLinhaSelecionada = this.tabela.getSelectedRow();
+		if (numLinhaSelecionada != -1)
+			return this.listaContas[numLinhaSelecionada];
+		return null;
+	}
 }
+
+
